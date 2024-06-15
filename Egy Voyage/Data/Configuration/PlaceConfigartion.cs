@@ -16,9 +16,7 @@ namespace EgyVoyageApi.Data.Configuration
             builder.Property(x => x.Name)
                 .HasColumnType("varchar")
                 .HasMaxLength(50);
-            builder.Property(x => x.Description)
-                .HasColumnType("varchar")
-                .HasMaxLength(250);
+           
 
             builder.Property(x => x.image)
                 .HasColumnType("varchar")

@@ -6,9 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using EgyVoyageApi.Repository.Abastract;
 using System.Net;
 using System.Net.Mail;
-using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
-using EgyVoyageApi.Repository.Implementation;
 using Egy_Voyage.DTOs;
 
 namespace EgyVoyageApi.Controllers
@@ -164,37 +161,75 @@ namespace EgyVoyageApi.Controllers
         [HttpPost("upload photo")] 
         public async Task<IActionResult> uploadPhoto(string email,[FromForm]uploadPhoto model )
         {
-            
-            var Userimage = new UserImage();
-            Userimage.email = email;
-            if (!ModelState.IsValid)
+            var id =  _context.users.Where(_ => _.Email == email).Select(x=>x.Id).SingleOrDefault();
+            bool check = _context.UserImages.Where(x => x.UserId==id).Any();
+            if (!check)
             {
-                return BadRequest("error in uploading");
-            }
-            if (model.imagefile != null)
-            {
-                var fileResult = _fileService.SaveImage(model.imagefile);
-                if (fileResult.Item1 == 1)
-                {
-                     Userimage.image = fileResult.Item2; // getting name of image
-                }
-                var productResult = _productRepo.AddAsync(Userimage);
-                if (productResult.Result==true)
-                {
-                    return Ok("succesfull");
-                }
-                else
-                {
-                    var path = $"Uploads/{fileResult.Item2}";
-                    if (System.IO.File.Exists(path))
-                    {
-                        System.IO.File.Delete(path);
-                    }
-                    return BadRequest("error in uploading1");
 
+
+                var Userimage = new UserImage();
+                Userimage.email = email;
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest("error in uploading");
                 }
+                if (model.imagefile != null)
+                {
+                    var fileResult = _fileService.SaveImage(model.imagefile);
+                    if (fileResult.Item1 == 1)
+                    {
+                        Userimage.image = fileResult.Item2; // getting name of image
+                    }
+                    var productResult = _productRepo.AddAsync(Userimage);
+                    if (productResult.Result==true)
+                    {
+                        return Ok("succesfull");
+                    }
+                    else
+                    {
+                        var path = $"Uploads/{fileResult.Item2}";
+                        if (System.IO.File.Exists(path))
+                        {
+                            System.IO.File.Delete(path);
+                        }
+                        return BadRequest("error in uploading1");
+
+                    }
+                }
+                return Ok("succesful");
             }
-            return Ok("succesful");
+            else
+            {
+                var userimage = _context.UserImages.Where(x=>x.UserId==id).SingleOrDefault();
+                var path = $"Uploads/{userimage.image}";
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
+                if (model.imagefile != null)
+                {
+                    var fileResult = _fileService.SaveImage(model.imagefile);
+                    if (fileResult.Item1 == 1)
+                    {
+                        userimage.image = fileResult.Item2; // getting name of image
+                        _context.SaveChanges();
+                        return Ok("succesfull");
+                    }
+                    else
+                    {
+                        var path2 = $"Uploads/{fileResult.Item2}";
+                        if (System.IO.File.Exists(path2))
+                        {
+                            System.IO.File.Delete(path2);
+                        }
+                        return BadRequest("error in uploading1");
+
+                    }
+                }
+                return Ok("succesful");
+
+
+            }
 
         }
         //-----------------End------------------uploadphoto-----------------End----------------------------//
@@ -213,7 +248,7 @@ namespace EgyVoyageApi.Controllers
                 var images = await  _context.UserImages.Where(x => x.UserId==UserId.Id).Select(x => x.image).ToListAsync();
                 var url = string.Join(",", images);
                 //return Ok($"https://localhost:7244/Resources/{url}");//for local
-                return Ok($"http://egyvoyage.somee.com/Resources/{url}");//for server
+                return Ok($"http://egyvoyage2.somee.com/Resources/{url}");//for server
             }
 
 
@@ -280,9 +315,9 @@ namespace EgyVoyageApi.Controllers
         //-----------------End---------------Forgetpassword-------------End------------------------//
         //-----------------begin---------------Editprofile---------------begin---------------------//
         [HttpPost("Edit")]
-        public async Task<IActionResult> EditProfile(string Emial,EditUserDto us)
+        public async Task<IActionResult> EditProfile(string Email,EditUserDto us)
         {
-            var User = await _context.users.Where(x=>x.Email == Emial).FirstOrDefaultAsync();
+            var User = await _context.users.Where(x=>x.Email == Email).FirstOrDefaultAsync();
             User.FName = us.FName;
             User.LName = us.LName;
             User.Email = us.Email;
@@ -300,9 +335,9 @@ namespace EgyVoyageApi.Controllers
                 .Select(x=>new
                 {
                   fnmam=  x.FName,
-                   lname= x.LName, 
-                   Email= x.Email,
-                    PhoneNumber= x.PhoneNumber
+                  lname= x.LName, 
+                  Email= x.Email,
+                  PhoneNumber= x.PhoneNumber
                 }).ToListAsync();
             bool check = await _context.users.Where(x => x.Email == email & x.Password==password).AnyAsync();
             if (check)

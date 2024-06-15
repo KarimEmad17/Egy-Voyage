@@ -1,4 +1,5 @@
-﻿using EgyVoyageApi.Entities;
+﻿using Egy_Voyage.Entities;
+using EgyVoyageApi.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EgyVoyageApi.Data
@@ -18,6 +19,7 @@ namespace EgyVoyageApi.Data
         public DbSet <feedback_Hotel> feedbacks { get; set; }
         public DbSet<place> places { get; set; }
         public DbSet<Admin> admin { get; set; }
+        public DbSet<receipt> receipts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

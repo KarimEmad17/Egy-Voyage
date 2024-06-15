@@ -21,6 +21,8 @@ namespace EgyVoyageApi.Controllers
         public async Task<IActionResult> GetAllAdmins()
         {
             var Admins = await _context.admin.ToListAsync();
+            
+            
             return Ok(Admins);
         }
         [HttpPost]

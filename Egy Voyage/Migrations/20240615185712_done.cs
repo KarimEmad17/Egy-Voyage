@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Egy_Voyage.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class done : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,7 +38,11 @@ namespace Egy_Voyage.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     location = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     cordinate = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
-                    rating = table.Column<decimal>(type: "decimal(2,1)", nullable: false)
+                    rating = table.Column<decimal>(type: "decimal(2,1)", nullable: false),
+                    map = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    day1 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    day2 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    day3 = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -53,11 +57,14 @@ namespace Egy_Voyage.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     city = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     rating = table.Column<decimal>(type: "decimal(2,1)", nullable: false),
                     url_location = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     cordinate = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    image = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
+                    image = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    pirce = table.Column<int>(type: "int", nullable: false),
+                    start = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    end = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,12 +134,39 @@ namespace Egy_Voyage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "receipts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    email = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    total_price = table.Column<int>(type: "int", maxLength: 9, nullable: false),
+                    processNumber = table.Column<long>(type: "bigint", nullable: false),
+                    reservation_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    pin_code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Start = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    End = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    HotelId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_receipts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_receipts_hotels_HotelId",
+                        column: x => x.HotelId,
+                        principalTable: "hotels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "rooms",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoomNumber = table.Column<string>(type: "varchar(4)", maxLength: 4, nullable: false),
+                    RoomNumber = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     price = table.Column<int>(type: "int", nullable: false),
                     capacity = table.Column<int>(type: "int", nullable: false),
@@ -182,17 +216,24 @@ namespace Egy_Voyage.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     roomId = table.Column<int>(type: "int", nullable: false),
                     Start = table.Column<DateTime>(type: "date", nullable: false),
-                    End = table.Column<DateTime>(type: "date", nullable: true)
+                    End = table.Column<DateTime>(type: "date", nullable: true),
+                    receiptId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_reservations", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_reservations_receipts_receiptId",
+                        column: x => x.receiptId,
+                        principalTable: "receipts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_reservations_rooms_roomId",
                         column: x => x.roomId,
                         principalTable: "rooms",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_reservations_users_UserId",
                         column: x => x.UserId,
@@ -236,6 +277,16 @@ namespace Egy_Voyage.Migrations
                 column: "Hotelid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_receipts_HotelId",
+                table: "receipts",
+                column: "HotelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_reservations_receiptId",
+                table: "reservations",
+                column: "receiptId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_reservations_roomId",
                 table: "reservations",
                 column: "roomId");
@@ -246,10 +297,9 @@ namespace Egy_Voyage.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_rooms_HotelId_RoomNumber",
+                name: "IX_rooms_HotelId",
                 table: "rooms",
-                columns: new[] { "HotelId", "RoomNumber" },
-                unique: true);
+                column: "HotelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserImages_UserId",
@@ -302,6 +352,9 @@ namespace Egy_Voyage.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserImages");
+
+            migrationBuilder.DropTable(
+                name: "receipts");
 
             migrationBuilder.DropTable(
                 name: "rooms");

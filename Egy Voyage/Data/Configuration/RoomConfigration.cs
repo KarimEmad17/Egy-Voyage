@@ -16,7 +16,7 @@ namespace EgyVoyageApi.Data.Configuration
             builder.Property(x=>x.Id)
                 .IsRequired().ValueGeneratedOnAdd();
             builder.Property(x=>x.RoomNumber)
-                .HasMaxLength(4)
+                .HasMaxLength(255)
                 .HasColumnType("varchar");
 
             builder.HasOne(x => x.Hotel)
@@ -25,8 +25,7 @@ namespace EgyVoyageApi.Data.Configuration
            
            
 
-            builder.HasIndex(x => new { x.HotelId, x.RoomNumber })
-                    .IsUnique();
+            
 
            // builder.HasData(loaddata());
         }

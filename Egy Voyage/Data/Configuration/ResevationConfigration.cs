@@ -27,7 +27,10 @@ namespace EgyVoyageApi.Data.Configuration
             builder.HasOne(x=>x.room)
                 .WithMany(room => room.Reservations)
                 .HasForeignKey(x=>x.roomId);
-           // builder.HasData(loaddata());
+            // builder.HasData(loaddata());
+            builder.HasOne(x => x.receipt)
+                .WithMany(x => x.Reservations)
+                .HasForeignKey(x => x.receiptId);
         }
 
         private static List<Reservation> loaddata()

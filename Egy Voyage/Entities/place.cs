@@ -10,5 +10,8 @@
         public string url_location { get; set; }
         public string cordinate { get; set; }
         public string image { get; set; }
+        public int pirce { get; set; }
+        public string start {  get; set; }
+        public string end { get; set; }
     }
 }

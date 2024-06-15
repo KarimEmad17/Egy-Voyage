@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Egy_Voyage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240511181813_initial")]
-    partial class initial
+    [Migration("20240615185712_done")]
+    partial class done
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,10 +90,26 @@ namespace Egy_Voyage.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar");
 
+                    b.Property<string>("day1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("day2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("day3")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("location")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar");
+
+                    b.Property<string>("map")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("rating")
                         .HasColumnType("decimal(2,1)");
@@ -141,12 +157,17 @@ namespace Egy_Voyage.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int>("receiptId")
+                        .HasColumnType("int");
+
                     b.Property<int>("roomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("receiptId");
 
                     b.HasIndex("roomId");
 
@@ -307,8 +328,7 @@ namespace Egy_Voyage.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -324,13 +344,24 @@ namespace Egy_Voyage.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar");
 
+                    b.Property<string>("end")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("image")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar");
 
+                    b.Property<int>("pirce")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("rating")
                         .HasColumnType("decimal(2,1)");
+
+                    b.Property<string>("start")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("url_location")
                         .IsRequired()
@@ -355,7 +386,7 @@ namespace Egy_Voyage.Migrations
 
                     b.Property<string>("RoomNumber")
                         .IsRequired()
-                        .HasMaxLength(4)
+                        .HasMaxLength(255)
                         .HasColumnType("varchar");
 
                     b.Property<bool>("breakfast")
@@ -383,10 +414,56 @@ namespace Egy_Voyage.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HotelId", "RoomNumber")
-                        .IsUnique();
+                    b.HasIndex("HotelId");
 
                     b.ToTable("rooms");
+                });
+
+            modelBuilder.Entity("Egy_Voyage.Entities.receipt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("End")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("HotelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("pin_code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("processNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("reservation_date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("total_price")
+                        .HasMaxLength(9)
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HotelId");
+
+                    b.ToTable("receipts");
                 });
 
             modelBuilder.Entity("EgyVoyageApi.Entities.Hotel_Image", b =>
@@ -408,11 +485,19 @@ namespace Egy_Voyage.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Egy_Voyage.Entities.receipt", "receipt")
+                        .WithMany("Reservations")
+                        .HasForeignKey("receiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("EgyVoyageApi.Entities.room", "room")
                         .WithMany("Reservations")
                         .HasForeignKey("roomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("receipt");
 
                     b.Navigation("room");
 
@@ -452,11 +537,24 @@ namespace Egy_Voyage.Migrations
                     b.Navigation("Hotel");
                 });
 
+            modelBuilder.Entity("Egy_Voyage.Entities.receipt", b =>
+                {
+                    b.HasOne("EgyVoyageApi.Entities.Hotel", "Hotel")
+                        .WithMany("receipts")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hotel");
+                });
+
             modelBuilder.Entity("EgyVoyageApi.Entities.Hotel", b =>
                 {
                     b.Navigation("feedbacks");
 
                     b.Navigation("images");
+
+                    b.Navigation("receipts");
 
                     b.Navigation("rooms");
                 });
@@ -470,6 +568,11 @@ namespace Egy_Voyage.Migrations
                 });
 
             modelBuilder.Entity("EgyVoyageApi.Entities.room", b =>
+                {
+                    b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("Egy_Voyage.Entities.receipt", b =>
                 {
                     b.Navigation("Reservations");
                 });

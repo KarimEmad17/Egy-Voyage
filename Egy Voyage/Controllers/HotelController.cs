@@ -9,6 +9,7 @@ using System;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.ComponentModel;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EgyVoyageApi.Controllers
 {
@@ -41,7 +42,11 @@ namespace EgyVoyageApi.Controllers
                 location =x.location,
                 price=x.rooms.Select(x=>x.price).Average().ToString(),
                 cordinate = x.cordinate,
-                image = $"http://egyvoyage.somee.com/Resources/{x.images.Select(x => x.image).FirstOrDefault()}"
+                day1 = x.day1,
+                x.map,
+                day2 = x.day2,
+                day3 = x.day3,
+                image = $"http://egyvoyage2.somee.com/Resources/{x.images.Select(x => x.image).FirstOrDefault()}"
                         // $"https://localhost:7244/Resources/{x.images.Select(x => x.image).FirstOrDefault()}"
 
             }).ToListAsync();
@@ -64,6 +69,10 @@ namespace EgyVoyageApi.Controllers
                     rating = hotel.rating,
                     location = hotel.location,
                     cordinate = hotel.cordinate,
+                    map = hotel.map,
+                    day1=hotel.day1,
+                    day2=hotel.day2,
+                    day3 = hotel.day3,
                 };
 
                 await _context.AddAsync(newHotel);
@@ -150,6 +159,10 @@ namespace EgyVoyageApi.Controllers
                     get.cordinate = hotel.cordinate;
                     get.location=hotel.location;
                     image.image=fileResult.Item2;
+                    get.map=hotel.map;
+                    get.day1=hotel.day1;
+                    get.day2=hotel.day2;
+                    get.day3=hotel.day3;
                     await _context.SaveChangesAsync();
 
                 }
@@ -197,12 +210,22 @@ namespace EgyVoyageApi.Controllers
         public async Task<IActionResult> DeleteHotel(int id)
         {
             var hotel = _context.hotels.Find(id);
+            bool check =_context.HotelImages.Where(x=>x.Hotelid==id).Any();
             if(hotel!=null){
-                var image = _context.HotelImages.FirstOrDefault(x => x.Hotelid == id);
-                _context.hotels.Remove(hotel);
-                _context.HotelImages.Remove(image);
-                _context.SaveChangesAsync();
-                _fileService.DeleteImage(image.image);
+                if (check)
+                {
+                    var image = _context.HotelImages.FirstOrDefault(x => x.Hotelid == id);
+                    _context.hotels.Remove(hotel);
+                    _context.HotelImages.Remove(image);
+                    _context.SaveChangesAsync();
+                    _fileService.DeleteImage(image.image);
+                }
+                else
+                {
+                    _context.hotels.Remove(hotel);
+                    _context.SaveChangesAsync();
+                    
+                }
             }
             else
             {
@@ -213,7 +236,7 @@ namespace EgyVoyageApi.Controllers
             return Ok($"succesful on delete {hotel.Name}");
         }
         [HttpGet("GetHotel_ID")]
-        public async Task<IActionResult> GetHotel_Id(int id)
+        public async Task<IActionResult> GetHotel_Id(int id) 
         {
             var hotel = _context.hotels.Where(x=>x.Id==id ).Select(x=>new
             {

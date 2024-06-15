@@ -39,7 +39,12 @@ namespace EgyVoyageApi.Controllers
                 city=x.city,
                url_location= x.url_location,
                 cordinate = x.cordinate,
-                image=x.image,
+                Adult_price=x.pirce,
+                child_price=x.pirce*0.02,
+                tourist_price=x.pirce*2,
+                start=x.start,
+                end=x.end,
+                image=$"http://egyvoyage2.somee.com/Resources/{x.image}",
 
             }).ToListAsync();
             return Ok(places);
@@ -54,7 +59,11 @@ namespace EgyVoyageApi.Controllers
                 Description = place.Description,
                 rating = place.rating,
                 url_location= place.url_location,
-                cordinate = place.cordinate
+                cordinate = place.cordinate,
+                pirce=place.price,
+                start=place.start,
+                end=place.end,
+                
             };
 
             if (!ModelState.IsValid)
@@ -142,5 +151,3 @@ namespace EgyVoyageApi.Controllers
 
 
 }
-    
-

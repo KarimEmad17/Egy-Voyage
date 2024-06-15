@@ -12,7 +12,6 @@ namespace EgyVoyageApi.Entities
         public bool freeWifi { get; set; }
         public bool smoking { get; set; }
         public bool breakfast { get; set; }
-
         public Hotel Hotel { get; set; }
         public int HotelId { get; set;}
         public string image { get; set; }
