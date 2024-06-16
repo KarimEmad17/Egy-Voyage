@@ -64,7 +64,22 @@ namespace EgyVoyageApi.Controllers
 
             return Ok("thanks");
         }
+        //feedback for spacific hotel
+        [HttpGet]
+        public async Task<IActionResult> GetFeedBack( int hotel_id)
+        {
+            var feedbacks = await _context.feedbacks.Include(x=>x.User).Where(x=>x.HotelId==hotel_id)
+                .Select(x => new
+                {
+                    x.User.Image.image,
+                    Name=x.User.FName+x.User.LName,
+                    x.rating,
+                    x.description,
 
-       
+                }).ToListAsync();
+            return Ok(feedbacks);
+        }
+
+
     }
 }

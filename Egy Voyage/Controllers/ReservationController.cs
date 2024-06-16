@@ -3,13 +3,10 @@ using System.Net;
 using EgyVoyageApi.Data;
 using EgyVoyageApi.DTOs;
 using EgyVoyageApi.Entities;
-using FluentEmail.Core;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Egy_Voyage.DTOs;
 using Egy_Voyage.Entities;
-using System.Xml.Linq;
 
 namespace EgyVoyageApi.Controllers
 {
