@@ -21,6 +21,7 @@ namespace EgyVoyageApi.Entities
         public UserImage Image { get; set; }
 
         public ICollection<Reservation> Reservations { get; set; }
+        public feedback_Hotel feedback { get; set; }
 
    
 
