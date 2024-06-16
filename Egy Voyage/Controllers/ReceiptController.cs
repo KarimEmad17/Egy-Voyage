@@ -28,16 +28,17 @@ namespace Egy_Voyage.Controllers
             var receipt = await _context.receipts.Include(x=>x.Hotel).Where(x=>x.email==email)
                 .Select(x=>new
                 {
-                    
-                   image=$"http://egyvoyage2.somee.com/Resources/{x.Hotel.images.Select(x => x.image).FirstOrDefault()}" ,
-                   hotel_name= x.Hotel.Name,
-                   name=x.Name,
+
+                   x.Id,
+                   image =$"http://egyvoyage2.somee.com/Resources/{x.Hotel.images.Select(x => x.image).FirstOrDefault()}" ,
+                   x.HotelId,
+                   hotel_name = x.Hotel.Name,
+                   name = x.Name,
                    x.total_price,
                    x.Start,
                    x.End,
                    x.processNumber,
                    x.pin_code
-
                 }).ToListAsync();
             return Ok(receipt);
         }
