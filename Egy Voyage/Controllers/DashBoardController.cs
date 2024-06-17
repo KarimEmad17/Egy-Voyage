@@ -1,7 +1,9 @@
 ﻿using EgyVoyageApi.Data;
+using EgyVoyageApi.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Egy_Voyage.Controllers
 {
@@ -19,25 +21,38 @@ namespace Egy_Voyage.Controllers
         public async Task<IActionResult> Get()
         {
             var monthNames = new[] { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
-            var reservation = await _context.receipts
-            .GroupBy(r => r.reservation_date.Month).OrderBy(g => g.Key).Select(g => new
-            {
-                MonthName = monthNames[g.Key - 1],
-                Reservations = g.ToList()
-            })
-            .ToListAsync();
-            return Ok(reservation);
+
+            var reservations = await _context.receipts
+                .Include(r => r.Hotel) // Ensure Hotel navigation property is included
+                .GroupBy(r => new { Month = r.reservation_date.Month })
+                .OrderBy(g => g.Key.Month)
+                .Select(g => new
+                {
+                    MonthName = monthNames[g.Key.Month - 1],
+                   
+                    data = g.GroupBy(r => new {HotelId= r.HotelId,HotelName=r.Hotel.Name }).Select(x => new
+                    {
+                        HotelId=x.Key.HotelId,
+                        HotelName=x.Key.HotelName,
+                        count = x.Count()
+                    })
+                })
+                .ToListAsync();
+
+
+
+            return Ok(reservations);
         }
         [HttpGet("Piechart")]
         public async Task<IActionResult> pie()
         {
-
+            float all = _context.receipts.Count();
             var counts = await _context.receipts
              .GroupBy(r => r.Hotel.Name)
              .Select(g => new
              {
                  HotelName = g.Key,
-                 ReservationCount = g.Count()
+                 ReservationCount = (g.Count()/all)*100
              })
              .ToListAsync();
 
