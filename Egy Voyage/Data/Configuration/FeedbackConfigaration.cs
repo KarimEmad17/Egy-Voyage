@@ -18,9 +18,13 @@ namespace EgyVoyageApi.Data.Configuration
             builder.HasOne(x => x.Hotel)
                 .WithMany(x => x.feedbacks)
                 .HasForeignKey(x => x.HotelId);
+            builder.HasOne(x => x.User)
+               .WithMany(x => x.feedbacks)
+               .HasForeignKey(x => x.user_id);
+               
 
-            builder.HasOne(x => x.User).WithOne(x => x.feedback).HasForeignKey<feedback_Hotel>(x => x.user_id);
-            builder.HasIndex(x => new { x.HotelId, x.user_id }).IsUnique();
+
+            builder.HasIndex(x => new { x.user_id, x.HotelId }).IsUnique();
         }
     }
 }

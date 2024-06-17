@@ -4,6 +4,7 @@ using EgyVoyageApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Egy_Voyage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240617053605_feedback2")]
+    partial class feedback2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -315,6 +318,9 @@ namespace Egy_Voyage.Migrations
 
                     b.HasIndex("HotelId");
 
+                    b.HasIndex("user_id")
+                        .IsUnique();
+
                     b.HasIndex("user_id", "HotelId")
                         .IsUnique();
 
@@ -527,8 +533,8 @@ namespace Egy_Voyage.Migrations
                         .IsRequired();
 
                     b.HasOne("EgyVoyageApi.Entities.User", "User")
-                        .WithMany("feedbacks")
-                        .HasForeignKey("user_id")
+                        .WithOne("feedback")
+                        .HasForeignKey("EgyVoyageApi.Entities.feedback_Hotel", "user_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -577,7 +583,8 @@ namespace Egy_Voyage.Migrations
 
                     b.Navigation("Reservations");
 
-                    b.Navigation("feedbacks");
+                    b.Navigation("feedback")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EgyVoyageApi.Entities.room", b =>
