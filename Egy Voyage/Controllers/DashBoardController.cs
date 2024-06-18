@@ -74,5 +74,48 @@ namespace Egy_Voyage.Controllers
 
             return Ok(result);
         }
+        [HttpGet("show_feedback")]
+        public async Task<IActionResult> show(bool type,int HotelId)
+        {
+            if (type)
+            {
+                var result = await _context.hotels.Include(x => x.feedbacks).Where(x => x.Id==HotelId)
+                    .Select(x => new
+                    {
+                        HotelId = x.Id,
+                        Name = x.Name,
+                        image = x.images.Select(x => x.image),
+                        x.rating,
+                        data = x.feedbacks.Where(x=>x.rating>6m).Select(x => new
+                        {
+                            name = x.User.FName+" "+x.User.LName,
+                            rating = x.rating,
+                            description = x.description,
+                        }).ToList(),
+                    })
+                    .ToListAsync();
+                return Ok(result);
+            }
+            else
+            {
+                var result = await _context.hotels.Include(x => x.feedbacks).Where(x => x.Id==HotelId)
+                    .Select(x => new
+                    {
+                        HotelId = x.Id,
+                        Name = x.Name,
+                        image = x.images.Select(x => x.image),
+                        x.rating,
+                        data = x.feedbacks.Where(x => x.rating<6m).Select(x => new
+                        {
+                            name = x.User.FName+" "+x.User.LName,
+                            rating = x.rating,
+                            description = x.description,
+                        }).ToList(),
+                    })
+                    .ToListAsync();
+                return Ok(result);
+            }
+           
+        }
     }
 }

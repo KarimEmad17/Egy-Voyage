@@ -19,11 +19,11 @@ namespace EgyVoyageApi.Controllers
             _context=context;
         }
         [HttpPost]
-        public async Task<IActionResult> GiveFeedBack(feedbackDTO reveiw,int hotel_id)
+        public async Task<IActionResult> GiveFeedBack(feedbackDTO reveiw, int hotel_id)
         {
-            
-            var user = _context.users.Where(x=>x.Email==reveiw.email).FirstOrDefault();
-            bool check = _context.feedbacks.Where(x=>x.user_id==user.Id&x.HotelId==hotel_id).Any();
+
+            var user = _context.users.Where(x => x.Email==reveiw.email).FirstOrDefault();
+            bool check = _context.feedbacks.Where(x => x.user_id==user.Id&x.HotelId==hotel_id).Any();
             if (!check)
             {
                 var feed = new feedback_Hotel
@@ -45,7 +45,7 @@ namespace EgyVoyageApi.Controllers
 
 
             }
-            int count = await _context.feedbacks.Where(x=>x.HotelId==hotel_id).CountAsync();
+            int count = await _context.feedbacks.Where(x => x.HotelId==hotel_id).CountAsync();
             if (count >100)
             {
                 var records = await _context.feedbacks.Where(x => x.HotelId == hotel_id).ToListAsync();
@@ -54,31 +54,32 @@ namespace EgyVoyageApi.Controllers
             }
             else if (count > 25)
             {
-                var rating = await _context.feedbacks.Where(x=>x.HotelId==hotel_id).Select(x => x.rating).AverageAsync();
-               var hotel= await _context.hotels.FindAsync(hotel_id);
+                var rating = await _context.feedbacks.Where(x => x.HotelId==hotel_id).Select(x => x.rating).AverageAsync();
+                var hotel = await _context.hotels.FindAsync(hotel_id);
                 hotel.rating = rating;
                 await _context.SaveChangesAsync();
 
             }
-            
+
 
             return Ok("thanks");
         }
         //feedback for spacific hotel
         [HttpGet]
-        public async Task<IActionResult> GetFeedBack( int hotel_id)
+        public async Task<IActionResult> GetFeedBack(int hotel_id)
         {
-            var feedbacks = await _context.feedbacks.Include(x=>x.User).Where(x=>x.HotelId==hotel_id)
+            var feedbacks = await _context.feedbacks.Include(x => x.User).Where(x => x.HotelId==hotel_id)
                 .Select(x => new
                 {
                     x.User.Image.image,
-                    Name=x.User.FName+x.User.LName,
+                    Name = x.User.FName+x.User.LName,
                     x.rating,
                     x.description,
 
                 }).ToListAsync();
             return Ok(feedbacks);
         }
+        
 
 
     }
