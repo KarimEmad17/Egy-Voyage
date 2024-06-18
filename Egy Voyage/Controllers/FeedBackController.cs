@@ -72,7 +72,7 @@ namespace EgyVoyageApi.Controllers
                 .Select(x => new
                 {
                     x.User.Image.image,
-                    Name = x.User.FName+x.User.LName,
+                    Name = x.User.FName+" "+x.User.LName,
                     x.rating,
                     x.description,
 
