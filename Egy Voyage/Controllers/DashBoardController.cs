@@ -58,5 +58,21 @@ namespace Egy_Voyage.Controllers
 
             return Ok(counts);
         }
+        [HttpGet("feedback_analysis")]
+        public async Task<IActionResult> analysis_feed()
+        {
+            var result = await _context.feedbacks.Include(x=>x.Hotel).GroupBy(x => new { x.HotelId,x.Hotel.Name,}).Select(x => new
+            {
+                HotelId = x.Key.HotelId,
+                HotelName = x.Key.Name,
+                
+                
+
+                Good= x.Count(x => x.rating>6.5m),
+                Bad=x.Count(x=>x.rating<6.5m)
+            }).ToListAsync();
+
+            return Ok(result);
+        }
     }
 }
